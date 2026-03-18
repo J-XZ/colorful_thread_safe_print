@@ -1,0 +1,33 @@
+cmake_minimum_required(VERSION 3.10)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_GENERATOR "Ninja")
+
+find_program(CLANG_18 clang-18)
+find_program(CLANGXX_18 clang++-18)
+if(CLANG_18 AND CLANGXX_18)
+    set(CMAKE_C_COMPILER ${CLANG_18})
+    set(CMAKE_CXX_COMPILER ${CLANGXX_18})
+endif()
+
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
+endif()
+
+project(test_print)
+enable_testing()
+add_library(test_print SHARED test_print.cc)
+target_include_directories(test_print PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_features(test_print PUBLIC cxx_std_17)
+
+add_executable(test_print_example example/basic_example.cc)
+target_compile_features(test_print_example PRIVATE cxx_std_17)
+target_link_libraries(test_print_example PRIVATE test_print)
+
+add_executable(mytest0 test/test0.cc)
+target_compile_features(mytest0 PRIVATE cxx_std_17)
+find_package(Threads REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+target_link_libraries(mytest0 PRIVATE GTest::gtest test_print Threads::Threads)
+add_test(NAME mytest0 COMMAND mytest0)
