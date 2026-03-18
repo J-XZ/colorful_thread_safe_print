@@ -5,6 +5,15 @@ if not set -q CMAKE_BUILD_TYPE
 end
 
 set script_dir (dirname (status --current-filename))
+set install_script $script_dir/install_deps.sh
+
+if test -x $install_script
+    bash $install_script
+else
+    echo "Missing dependency installer: $install_script" >&2
+    exit 1
+end
+
 mkdir -p $script_dir/build
 cd $script_dir/build
 

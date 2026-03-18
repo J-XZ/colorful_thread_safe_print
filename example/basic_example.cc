@@ -1,16 +1,13 @@
-#include "test_print.h"
+#include "colorful_thread_safe_print.h"
 
 int main() {
-    test_print::print("plain", "text", 42);
+    ctsp::p("plain", "text", 42);
 
-    test_print::print(test_print::colored("error").red(),
-                      test_print::colored("warning").yellow(),
-                      test_print::colored("success").green());
+    ctsp::p(ctsp::c("error").red(), ctsp::c("warning").yellow(),
+            ctsp::c("success").green());
 
-    test_print::print("mixed",
-                      test_print::colored("[blue]").bright_blue(),
-                      "segments",
-                      test_print::colored(2026).bright_magenta());
+    ctsp::p("mixed", ctsp::c("[blue]").bright_blue(), "segments",
+            ctsp::c(2026).bright_magenta());
 
     return 0;
 }
