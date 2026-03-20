@@ -1,15 +1,29 @@
 #!/usr/bin/env fish
 
 set script_dir (dirname (status --current-filename))
-source $script_dir/../../scripts/cxlkv_helpers.fish
 set install_script $script_dir/install_deps.sh
-set project_key thirdparty_libs/colorful_thread_safe_print
 
-cxlkv_prepare_build_env $script_dir
-
-if cxlkv_build_done $project_key
-    exit 0
+if not set -q CMAKE_BUILD_TYPE
+    set -gx CMAKE_BUILD_TYPE Debug
+else
+    set -gx CMAKE_BUILD_TYPE $CMAKE_BUILD_TYPE
 end
+
+set build_dir $script_dir/build
+set cache_dir $script_dir/.cache
+set tmp_dir $cache_dir/tmp
+set runtime_dir $tmp_dir/runtime
+set ccache_temp_dir $tmp_dir/ccache
+set ccache_dir $build_dir/ccache
+
+mkdir -p $build_dir $cache_dir $tmp_dir $runtime_dir $ccache_temp_dir $ccache_dir
+
+set -gx TMPDIR $tmp_dir
+set -gx TMP $tmp_dir
+set -gx TEMP $tmp_dir
+set -gx XDG_RUNTIME_DIR $runtime_dir
+set -gx CCACHE_TEMPDIR $ccache_temp_dir
+set -gx CCACHE_DIR $ccache_dir
 
 if test -x $install_script
     bash $install_script
@@ -19,7 +33,13 @@ else
     exit 1
 end
 
-cxlkv_configure_and_build $script_dir
-or exit $status
-
-cxlkv_mark_build_done $project_key
+pushd $build_dir >/dev/null
+cmake -G Ninja -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE ..
+or begin
+    popd >/dev/null
+    exit 1
+end
+cmake --build .
+set build_status $status
+popd >/dev/null
+exit $build_status
