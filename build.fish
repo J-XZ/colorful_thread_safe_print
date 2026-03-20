@@ -1,22 +1,25 @@
 #!/usr/bin/env fish
 
-if not set -q CMAKE_BUILD_TYPE
-    set CMAKE_BUILD_TYPE Debug
-end
-
 set script_dir (dirname (status --current-filename))
+source $script_dir/../../scripts/cxlkv_helpers.fish
 set install_script $script_dir/install_deps.sh
+set project_key thirdparty_libs/colorful_thread_safe_print
+
+cxlkv_prepare_build_env $script_dir
+
+if cxlkv_build_done $project_key
+    exit 0
+end
 
 if test -x $install_script
     bash $install_script
+    or exit $status
 else
     echo "Missing dependency installer: $install_script" >&2
     exit 1
 end
 
-mkdir -p $script_dir/build
-cd $script_dir/build
+cxlkv_configure_and_build $script_dir
+or exit $status
 
-cmake -G Ninja -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE ..
-
-ninja
+cxlkv_mark_build_done $project_key

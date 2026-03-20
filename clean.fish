@@ -1,13 +1,12 @@
 #!/usr/bin/env fish
 
 set script_dir (dirname (status --current-filename))
-set paths_to_remove \
-    $script_dir/build \
-    $script_dir/.cache
+source $script_dir/../../scripts/cxlkv_helpers.fish
+set project_key thirdparty_libs/colorful_thread_safe_print
 
-for path in $paths_to_remove
-    if test -e $path
-        echo "Removing $path"
-        rm -rf $path
-    end
+if cxlkv_clean_done $project_key
+    exit 0
 end
+
+cxlkv_clean_local_outputs $script_dir
+cxlkv_mark_clean_done $project_key
