@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 
-set script_dir (dirname (status --current-filename))
+set script_dir (realpath (dirname (status --current-filename)))
 set install_script $script_dir/install_deps.sh
 
 if not set -q CMAKE_BUILD_TYPE
