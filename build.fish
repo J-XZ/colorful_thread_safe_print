@@ -12,17 +12,15 @@ end
 set build_dir $script_dir/build
 set cache_dir $script_dir/.cache
 set tmp_dir $cache_dir/tmp
-set runtime_dir $tmp_dir/runtime
-set ccache_temp_dir $tmp_dir/ccache
 set ccache_dir $build_dir/ccache
 
-mkdir -p $build_dir $cache_dir $tmp_dir $runtime_dir $ccache_temp_dir $ccache_dir
+mkdir -p $build_dir $cache_dir $tmp_dir $ccache_dir
 
 set -gx TMPDIR $tmp_dir
 set -gx TMP $tmp_dir
 set -gx TEMP $tmp_dir
-set -gx XDG_RUNTIME_DIR $runtime_dir
-set -gx CCACHE_TEMPDIR $ccache_temp_dir
+set -e XDG_RUNTIME_DIR
+set -gx CCACHE_TEMPDIR $tmp_dir
 set -gx CCACHE_DIR $ccache_dir
 
 if test -x $install_script
@@ -42,4 +40,15 @@ end
 cmake --build .
 set build_status $status
 popd >/dev/null
+
+if test -d $build_dir/ccache
+    rmdir $build_dir/ccache 2>/dev/null
+end
+if test -d $cache_dir/tmp
+    rmdir $cache_dir/tmp 2>/dev/null
+end
+if test -d $cache_dir
+    rmdir $cache_dir 2>/dev/null
+end
+
 exit $build_status
