@@ -37,18 +37,15 @@ or begin
     popd >/dev/null
     exit 1
 end
+
 cmake --build .
 set build_status $status
 popd >/dev/null
 
-if test -d $build_dir/ccache
-    rmdir $build_dir/ccache 2>/dev/null
-end
-if test -d $cache_dir/tmp
-    rmdir $cache_dir/tmp 2>/dev/null
-end
-if test -d $cache_dir
-    rmdir $cache_dir 2>/dev/null
+for path in $build_dir/ccache $cache_dir/tmp $cache_dir
+    if test -d $path
+        rmdir $path 2>/dev/null
+    end
 end
 
 exit $build_status
