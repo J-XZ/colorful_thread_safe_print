@@ -6,9 +6,7 @@ set test_binary $build_dir/mytest0
 set built_library
 
 for candidate in \
-    $build_dir/libcolorful_thread_safe_print.dylib \
-    $build_dir/libcolorful_thread_safe_print.so \
-    $build_dir/libcolorful_thread_safe_print.dll
+    $build_dir/libcolorful_thread_safe_print.a
     if test -e $candidate
         set built_library $candidate
         break

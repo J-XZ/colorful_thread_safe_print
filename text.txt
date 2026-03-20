@@ -1,3 +1,0 @@
-plain text 42
-error warning success
-mixed [blue] segments 2026

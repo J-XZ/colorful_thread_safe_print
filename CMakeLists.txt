@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
+include(CheckIPOSupported)
+
+set(CMAKE_C_COMPILER clang-18)
+set(CMAKE_CXX_COMPILER clang++-18)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_GENERATOR "Ninja")
-
-find_program(CLANG_18 clang-18)
-find_program(CLANGXX_18 clang++-18)
-if(CLANG_18 AND CLANGXX_18)
-    set(CMAKE_C_COMPILER ${CLANG_18})
-    set(CMAKE_CXX_COMPILER ${CLANGXX_18})
-endif()
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
@@ -16,16 +13,41 @@ if(CCACHE_PROGRAM)
 endif()
 
 project(colorful_thread_safe_print)
+set(BUILD_SHARED_LIBS OFF)
+
+check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
+if(NOT ipo_supported)
+    message(FATAL_ERROR "IPO/LTO is not supported: ${ipo_error}")
+endif()
+
 enable_testing()
-add_library(colorful_thread_safe_print SHARED colorful_thread_safe_print.cc)
+add_library(colorful_thread_safe_print STATIC colorful_thread_safe_print.cc)
+target_compile_options(colorful_thread_safe_print PRIVATE
+    $<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-flto=full>
+)
+target_link_options(colorful_thread_safe_print PRIVATE
+    $<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-flto=full>
+)
 target_include_directories(colorful_thread_safe_print PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_features(colorful_thread_safe_print PUBLIC cxx_std_17)
 
 add_executable(colorful_thread_safe_print_example example/basic_example.cc)
+target_compile_options(colorful_thread_safe_print_example PRIVATE
+    $<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-flto=full>
+)
+target_link_options(colorful_thread_safe_print_example PRIVATE
+    $<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-flto=full>
+)
 target_compile_features(colorful_thread_safe_print_example PRIVATE cxx_std_17)
 target_link_libraries(colorful_thread_safe_print_example PRIVATE colorful_thread_safe_print)
 
 add_executable(mytest0 test/test0.cc)
+target_compile_options(mytest0 PRIVATE
+    $<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-flto=full>
+)
+target_link_options(mytest0 PRIVATE
+    $<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-flto=full>
+)
 target_compile_features(mytest0 PRIVATE cxx_std_17)
 find_package(Threads REQUIRED)
 if(APPLE)

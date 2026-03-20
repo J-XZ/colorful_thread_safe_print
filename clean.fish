@@ -9,7 +9,5 @@ for path in $paths_to_remove
     if test -e $path
         echo "Removing $path"
         rm -rf $path
-    else
-        echo "Skipping missing path: $path"
     end
 end
