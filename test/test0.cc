@@ -32,6 +32,16 @@ TEST(MyTest, PrintSupportsMixedColoredSegments) {
   EXPECT_EQ(testing::internal::GetCapturedStdout(), "left plain 7\n");
 }
 
+TEST(MyTest, PrintDoesNotPrefixSpaceAfterEmbeddedNewline) {
+  testing::internal::CaptureStdout();
+  ctsp::p(ctsp::c("Node count:").blue(), 1, ";", ctsp::c("Nodes:").blue(),
+          "127.0.0.1:50051\n", ctsp::c("current node:").blue(),
+          "127.0.0.1", ":", 50051);
+  EXPECT_EQ(testing::internal::GetCapturedStdout(),
+            "Node count: 1 ; Nodes: 127.0.0.1:50051\n"
+            "current node: 127.0.0.1 : 50051\n");
+}
+
 TEST(MyTest, PrintIsThreadSafeAtLineGranularity) {
   testing::internal::CaptureStdout();
 

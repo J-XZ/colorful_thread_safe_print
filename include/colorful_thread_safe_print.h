@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace colorful_thread_safe_print {
@@ -90,17 +91,55 @@ seg c(T&& value) {
   return seg(out.str());
 }
 
+inline bool ends_with_newline_after_ansi(std::string_view text) {
+  size_t end = text.size();
+  while (end > 0) {
+    if (text[end - 1] == '\n') {
+      return true;
+    }
+
+    if (text[end - 1] != 'm') {
+      return false;
+    }
+
+    const size_t esc = text.rfind('\033', end - 1);
+    if (esc == std::string_view::npos || esc + 1 >= end || text[esc + 1] != '[') {
+      return false;
+    }
+
+    for (size_t i = esc + 2; i + 1 < end; ++i) {
+      const char ch = text[i];
+      if ((ch < '0' || ch > '9') && ch != ';') {
+        return false;
+      }
+    }
+
+    end = esc;
+  }
+
+  return false;
+}
+
 template <typename... Args>
 void p(Args&&... args) {
   const bool color_on = tty();
   std::ostringstream out;
   bool first = true;
+  bool at_line_start = true;
   auto one = [&](const auto& value) {
-    if (!first) {
+    if (!first && !at_line_start) {
       out << ' ';
     }
     first = false;
-    put(out, value, color_on);
+
+    std::ostringstream piece_stream;
+    put(piece_stream, value, color_on);
+    const std::string piece = piece_stream.str();
+    out << piece;
+
+    if (!piece.empty()) {
+      at_line_start = ends_with_newline_after_ansi(piece);
+    }
   };
   (one(std::forward<Args>(args)), ...);
   out << '\n';
