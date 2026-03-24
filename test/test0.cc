@@ -35,8 +35,8 @@ TEST(MyTest, PrintSupportsMixedColoredSegments) {
 TEST(MyTest, PrintDoesNotPrefixSpaceAfterEmbeddedNewline) {
   testing::internal::CaptureStdout();
   ctsp::p(ctsp::c("Node count:").blue(), 1, ";", ctsp::c("Nodes:").blue(),
-          "127.0.0.1:50051\n", ctsp::c("current node:").blue(),
-          "127.0.0.1", ":", 50051);
+          "127.0.0.1:50051\n", ctsp::c("current node:").blue(), "127.0.0.1",
+          ":", 50051);
   EXPECT_EQ(testing::internal::GetCapturedStdout(),
             "Node count: 1 ; Nodes: 127.0.0.1:50051\n"
             "current node: 127.0.0.1 : 50051\n");
@@ -58,6 +58,13 @@ TEST(MyTest, PrintIsThreadSafeAtLineGranularity) {
   EXPECT_NE(output.find("alpha 1\n"), std::string::npos);
   EXPECT_NE(output.find("beta 2\n"), std::string::npos);
   EXPECT_NE(output.find("gamma 3\n"), std::string::npos);
+}
+
+TEST(MyTest, PrintContainN) {
+  testing::internal::CaptureStdout();
+  ctsp::p("Line 1", "\n", "Line 2", "\n", "Line 3");
+  EXPECT_EQ(testing::internal::GetCapturedStdout(),
+            "Line 1\nLine 2\nLine 3\n");
 }
 
 TEST(MyTest, ConcurrentPrintKeepsLinesIntactUnderLoad) {

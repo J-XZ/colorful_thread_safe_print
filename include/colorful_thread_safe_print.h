@@ -120,6 +120,40 @@ inline bool ends_with_newline_after_ansi(std::string_view text) {
   return false;
 }
 
+inline bool starts_with_newline_after_ansi(std::string_view text) {
+  size_t pos = 0;
+  while (pos < text.size()) {
+    if (text[pos] == '\n') {
+      return true;
+    }
+
+    if (text[pos] != '\033') {
+      return false;
+    }
+    if (pos + 1 >= text.size() || text[pos + 1] != '[') {
+      return false;
+    }
+
+    size_t i = pos + 2;
+    for (; i < text.size(); ++i) {
+      const char ch = text[i];
+      if (ch == 'm') {
+        pos = i + 1;
+        break;
+      }
+      if ((ch < '0' || ch > '9') && ch != ';') {
+        return false;
+      }
+    }
+
+    if (i >= text.size()) {
+      return false;
+    }
+  }
+
+  return false;
+}
+
 template <typename... Args>
 void p(Args&&... args) {
   const bool color_on = tty();
@@ -127,14 +161,15 @@ void p(Args&&... args) {
   bool first = true;
   bool at_line_start = true;
   auto one = [&](const auto& value) {
-    if (!first && !at_line_start) {
-      out << ' ';
-    }
-    first = false;
-
     std::ostringstream piece_stream;
     put(piece_stream, value, color_on);
     const std::string piece = piece_stream.str();
+    const bool starts_with_newline = starts_with_newline_after_ansi(piece);
+
+    if (!first && !at_line_start && !starts_with_newline) {
+      out << ' ';
+    }
+    first = false;
     out << piece;
 
     if (!piece.empty()) {
