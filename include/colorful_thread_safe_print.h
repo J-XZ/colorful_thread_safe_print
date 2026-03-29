@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 
+#include <cstdint>
 #include <cstdio>
 #include <sstream>
 #include <string>
@@ -89,6 +90,20 @@ seg c(T&& value) {
   std::ostringstream out;
   out << std::forward<T>(value);
   return seg(out.str());
+}
+
+inline std::string format_hex(uint64_t value) {
+  std::ostringstream out;
+  out << "0x" << std::hex << value;
+  return out.str();
+}
+
+inline std::string format_bin(uint8_t value) {
+  std::string out = "0b";
+  for (int bit = 7; bit >= 0; --bit) {
+    out.push_back(((value >> bit) & 0x1U) != 0 ? '1' : '0');
+  }
+  return out;
 }
 
 inline bool ends_with_newline_after_ansi(std::string_view text) {

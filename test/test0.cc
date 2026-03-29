@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -65,6 +66,18 @@ TEST(MyTest, PrintContainN) {
   ctsp::p("Line 1", "\n", "Line 2", "\n", "Line 3");
   EXPECT_EQ(testing::internal::GetCapturedStdout(),
             "Line 1\nLine 2\nLine 3\n");
+}
+
+TEST(MyTest, FormatHexForUint64) {
+  EXPECT_EQ(ctsp::format_hex(0), "0x0");
+  EXPECT_EQ(ctsp::format_hex(0x1234ULL), "0x1234");
+  EXPECT_EQ(ctsp::format_hex(UINT64_MAX), "0xffffffffffffffff");
+}
+
+TEST(MyTest, FormatBinForUint8) {
+  EXPECT_EQ(ctsp::format_bin(static_cast<uint8_t>(0)), "0b00000000");
+  EXPECT_EQ(ctsp::format_bin(static_cast<uint8_t>(5)), "0b00000101");
+  EXPECT_EQ(ctsp::format_bin(static_cast<uint8_t>(255)), "0b11111111");
 }
 
 TEST(MyTest, ConcurrentPrintKeepsLinesIntactUnderLoad) {
