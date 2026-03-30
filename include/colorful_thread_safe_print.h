@@ -118,7 +118,8 @@ inline bool ends_with_newline_after_ansi(std::string_view text) {
     }
 
     const size_t esc = text.rfind('\033', end - 1);
-    if (esc == std::string_view::npos || esc + 1 >= end || text[esc + 1] != '[') {
+    if (esc == std::string_view::npos || esc + 1 >= end ||
+        text[esc + 1] != '[') {
       return false;
     }
 
