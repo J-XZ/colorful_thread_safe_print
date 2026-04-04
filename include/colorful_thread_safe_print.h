@@ -79,6 +79,11 @@ inline void put(std::ostringstream& out, const seg& value, bool color_on) {
   out << value.str(color_on);
 }
 
+inline void put(std::ostringstream& out, bool v, bool color_on) {
+  (void)color_on;
+  out << (v ? "true" : "false");
+}
+
 template <typename T>
 inline void put(std::ostringstream& out, const T& value, bool color_on) {
   (void)color_on;
