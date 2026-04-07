@@ -12,7 +12,7 @@ end
 set build_dir $script_dir/build
 set cache_dir $script_dir/.cache
 set tmp_dir $cache_dir/tmp
-set ccache_dir $build_dir/ccache
+set ccache_dir /root/code/ccache_files
 
 mkdir -p $build_dir $cache_dir $tmp_dir $ccache_dir
 
@@ -42,7 +42,7 @@ cmake --build .
 set build_status $status
 popd >/dev/null
 
-for path in $build_dir/ccache $cache_dir/tmp $cache_dir
+for path in $cache_dir/tmp $cache_dir
     if test -d $path
         rmdir $path 2>/dev/null
     end
