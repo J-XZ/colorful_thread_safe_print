@@ -201,7 +201,7 @@ void p(Args&&... args) {
   out << '\n';
 
   const std::string text = out.str();
-  std::printf("%s", text.c_str());
+  std::fwrite(text.data(), 1, text.size(), stdout);
   std::fflush(stdout);
 }
 

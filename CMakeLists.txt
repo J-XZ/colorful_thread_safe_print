@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 include(CheckIPOSupported)
 
+if(DEFINED CXLKV_ENABLE_ASAN AND NOT DEFINED CTSP_ENABLE_ASAN)
+    set(CTSP_ENABLE_ASAN "${CXLKV_ENABLE_ASAN}" CACHE BOOL
+        "Enable AddressSanitizer for colorful_thread_safe_print" FORCE)
+else()
+    option(CTSP_ENABLE_ASAN "Enable AddressSanitizer for colorful_thread_safe_print" OFF)
+endif()
+
 set(CMAKE_C_COMPILER clang-18)
 set(CMAKE_CXX_COMPILER clang++-18)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -24,6 +31,29 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU|AppleClang")
     string(APPEND CMAKE_CXX_FLAGS_RELEASE " -O3 -march=native")
     string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -O3 -g3 -march=native")
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " -O0 -g3")
+endif()
+
+# Normalize ASAN flags first so ON/OFF switching in the same build dir does
+# not keep stale sanitize instrumentation.
+string(REPLACE "-fsanitize=address" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+string(REPLACE "-fno-omit-frame-pointer" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+string(REPLACE "-fsanitize=address" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REPLACE "-fno-omit-frame-pointer" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REPLACE "-fsanitize=address" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+string(REPLACE "-fsanitize=address" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
+string(REPLACE "-fsanitize=address" "" CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS}")
+string(STRIP "${CMAKE_C_FLAGS}" CMAKE_C_FLAGS)
+string(STRIP "${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS)
+string(STRIP "${CMAKE_EXE_LINKER_FLAGS}" CMAKE_EXE_LINKER_FLAGS)
+string(STRIP "${CMAKE_SHARED_LINKER_FLAGS}" CMAKE_SHARED_LINKER_FLAGS)
+string(STRIP "${CMAKE_MODULE_LINKER_FLAGS}" CMAKE_MODULE_LINKER_FLAGS)
+
+if(CTSP_ENABLE_ASAN)
+    string(APPEND CMAKE_C_FLAGS " -fsanitize=address -fno-omit-frame-pointer")
+    string(APPEND CMAKE_CXX_FLAGS " -fsanitize=address -fno-omit-frame-pointer")
+    string(APPEND CMAKE_EXE_LINKER_FLAGS " -fsanitize=address")
+    string(APPEND CMAKE_SHARED_LINKER_FLAGS " -fsanitize=address")
+    string(APPEND CMAKE_MODULE_LINKER_FLAGS " -fsanitize=address")
 endif()
 
 check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
