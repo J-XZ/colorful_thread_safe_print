@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 
-set script_dir (realpath (dirname (status --current-filename)))
+set script_dir (dirname (realpath (status filename))) 
 set install_script $script_dir/install_deps.sh
 
 function compute_build_jobs

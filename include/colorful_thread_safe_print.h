@@ -205,6 +205,39 @@ void p(Args&&... args) {
   std::fflush(stdout);
 }
 
+template <typename... Args>
+void pp(Args&&... args) {
+  std::ostringstream out;
+  bool first = true;
+  bool at_line_start = true;
+  auto one = [&](const auto& value) {
+    std::ostringstream piece_stream;
+    put(piece_stream, value, false);
+    const std::string piece = piece_stream.str();
+    const bool starts_with_newline = starts_with_newline_after_ansi(piece);
+
+    if (!first && !at_line_start && !starts_with_newline) {
+      out << ' ';
+    }
+    first = false;
+    out << piece;
+
+    if (!piece.empty()) {
+      at_line_start = ends_with_newline_after_ansi(piece);
+    }
+  };
+  (one(std::forward<Args>(args)), ...);
+  out << '\n';
+
+  const std::string text = out.str();
+  std::ostringstream wrapped;
+  wrapped << "\033[" << static_cast<int>(clr::magenta) << "m" << text
+          << "\033[0m";
+  const std::string colored = wrapped.str();
+  std::fwrite(colored.data(), 1, colored.size(), stdout);
+  std::fflush(stdout);
+}
+
 }  // namespace colorful_thread_safe_print
 
-namespace ctsp = colorful_thread_safe_print;
+namespace ctsp = colorful_thread_safe_print;  // NOLINT(misc-unused-alias-decls)

@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 
-set script_dir (realpath (dirname (status --current-filename)))
+set script_dir (dirname (realpath (status filename))) 
 
 for path in \
     $script_dir/build \
