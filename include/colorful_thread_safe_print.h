@@ -268,17 +268,18 @@ void pb(Args&&... args) {
     }
   };
   (one(std::forward<Args>(args)), ...);
-  out << '\n';
 
   const std::string text = out.str();
   if (!color_on) {
     std::fwrite(text.data(), 1, text.size(), stdout);
+    std::fwrite("\n", 1, 1, stdout);
     std::fflush(stdout);
     return;
   }
 
   std::ostringstream wrapped;
-  wrapped << "\033[30;47m" << text << "\033[0m";
+  // Reset before newline to avoid style leaking into subsequent plain output.
+  wrapped << "\033[30;47m" << text << "\033[0m\n";
   const std::string colored = wrapped.str();
   std::fwrite(colored.data(), 1, colored.size(), stdout);
   std::fflush(stdout);
