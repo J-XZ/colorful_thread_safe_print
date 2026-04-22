@@ -37,6 +37,7 @@ class seg {
 
   seg& fg(clr value) {
     color_ = value;
+    custom_sgr_.clear();
     return *this;
   }
 
@@ -44,6 +45,11 @@ class seg {
   seg& red() { return fg(clr::red); }
   seg& green() { return fg(clr::green); }
   seg& yellow() { return fg(clr::yellow); }
+  seg& dark_yellow() { 
+    custom_sgr_ = "2;33";
+    color_ = clr::def; 
+    return *this;
+  }
   seg& blue() { return fg(clr::blue); }
   seg& magenta() { return fg(clr::magenta); }
   seg& cyan() { return fg(clr::cyan); }
@@ -60,17 +66,24 @@ class seg {
 
   std::string str(bool color_on = true) const {
     if (!color_on || color_ == clr::def) {
-      return text_;
+      if (!color_on || custom_sgr_.empty()) {
+        return text_;
+      }
     }
 
     std::ostringstream out;
-    out << "\033[" << static_cast<int>(color_) << "m" << text_ << "\033[0m";
+    if (!custom_sgr_.empty()) {
+      out << "\033[" << custom_sgr_ << "m" << text_ << "\033[0m";
+    } else {
+      out << "\033[" << static_cast<int>(color_) << "m" << text_ << "\033[0m";
+    }
     return out.str();
   }
 
  private:
   std::string text_;
   clr color_ = clr::def;
+  std::string custom_sgr_;
 };
 
 inline bool tty() { return ::isatty(fileno(stdout)) != 0; }
