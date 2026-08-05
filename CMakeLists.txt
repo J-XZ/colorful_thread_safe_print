@@ -1,12 +1,23 @@
 cmake_minimum_required(VERSION 3.10)
 include(CheckIPOSupported)
 
+# Shared CXLKV build options: cache entries for CXLKV_ENABLE_ASAN,
+# CXLKV_ENABLE_FRAME_POINTERS and CXLKV_MALLOC that the variant-isolated
+# consumers verify against this dependency's CMakeCache.txt.
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CxlkvBuildOptions.cmake)
+
 if(DEFINED CXLKV_ENABLE_ASAN AND NOT DEFINED CTSP_ENABLE_ASAN)
     set(CTSP_ENABLE_ASAN "${CXLKV_ENABLE_ASAN}" CACHE BOOL
         "Enable AddressSanitizer for colorful_thread_safe_print" FORCE)
 else()
     option(CTSP_ENABLE_ASAN "Enable AddressSanitizer for colorful_thread_safe_print" OFF)
 endif()
+
+if(NOT DEFINED LATENCY_SIM_COMPILE_OFF)
+    set(LATENCY_SIM_COMPILE_OFF OFF)
+endif()
+set(LATENCY_SIM_COMPILE_OFF "${LATENCY_SIM_COMPILE_OFF}" CACHE BOOL
+    "Keep the colorful_thread_safe_print dependency variant aligned with latency_sim consumers" FORCE)
 
 set(CMAKE_C_COMPILER clang-18)
 set(CMAKE_CXX_COMPILER clang++-18)
